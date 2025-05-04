@@ -1,0 +1,13 @@
+import time
+from picamera import PiCamera
+
+camera = PiCamera()
+
+for i in range(1,6):
+
+    camera.start_preview()
+
+    time.sleep(2)
+    camera.capture('/home/pi/Desktop/images/image%d.jpg'%i)
+    camera.stop_preview()
+camera.close()

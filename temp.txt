@@ -1,0 +1,27 @@
+const int lm135Pin = A0;
+
+void setup() {
+  pinMode(13, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  digitalWrite(13, HIGH);
+  
+  // Read the analog value from the temperature sensor
+  int rawValue = analogRead(lm135Pin);
+  
+  // Convert the raw analog reading to temperature in Celsius
+  float temperatureC = (5.0 * rawValue * 100.0) / 1024.0;
+  Serial.println(temperatureC);
+
+  // Check if the temperature exceeds 38°C
+  if (temperatureC >= 38) {
+    Serial.println("High Temperature");
+    digitalWrite(13, LOW);
+  } else {
+    digitalWrite(13, HIGH);
+  } 
+  
+  delay(1000); // Delay of 1 second
+}
