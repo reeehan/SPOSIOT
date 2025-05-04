@@ -1,0 +1,73 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    int n, m, hit = 0;
+    cout << "Enter number of frames: ";
+    cin >> n;
+    cout << "Enter number of processes: ";
+    cin >> m;
+
+    vector<int> p(m), hi(m, 0);
+    vector<vector<int>> a(n, vector<int>(m, -1));
+    map<int, int> mp;  // Tracks page frequency and order
+
+    cout << "Enter processes: ";
+    for (int i = 0; i < m; i++) cin >> p[i];
+
+    for (int i = 0; i < m; i++) {
+        // Sort pages by frequency for replacement choice
+        vector<pair<int, int>> freq(mp.begin(), mp.end());
+        sort(freq.begin(), freq.end());
+
+        bool page_loaded = false;
+        for (int j = 0; j < n; j++) {
+            if (a[j][i] == p[i]) {  // Page hit
+                hit++;
+                hi[i] = 1;
+                mp[p[i]]++;
+                page_loaded = true;
+                break;
+            }
+            if (a[j][i] == -1) {  // Empty frame
+                fill(a[j].begin() + i, a[j].end(), p[i]);
+                mp[p[i]]++;
+                page_loaded = true;
+                break;
+            }
+        }
+
+        // If page is not in frames, replace least recently used page
+        if (!page_loaded) {
+            for (int j = 0; j < n; j++) {
+                if (a[j][i] == freq.back().second) {
+                    mp.erase(a[j][i]);
+                    fill(a[j].begin() + i, a[j].end(), p[i]);
+                    mp[p[i]]++;
+                    break;
+                }
+            }
+        }
+
+        // Update access frequencies for all pages except the current one
+        for (auto &q : mp) {
+            if (q.first != p[i]) q.second++;
+        }
+    }
+
+    // Display frames and hit/fault summary
+    cout << "Process: ";
+    for (int i : p) cout << i << " ";
+    cout << "\n";
+
+    for (int i = 0; i < n; i++) {
+        cout << "Frame " << i << ": ";
+        for (int j = 0; j < m; j++) cout << (a[i][j] == -1 ? "E " : to_string(a[i][j]) + " ");
+        cout << "\n";
+    }
+
+    for (int i : hi) cout << (i == 0 ? "  " : "1 ");
+    cout << "\nHits: " << hit << "\nPage Faults: " << m - hit << "\n";
+
+    return 0;
+}

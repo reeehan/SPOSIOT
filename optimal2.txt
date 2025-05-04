@@ -1,0 +1,75 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    int n, m;
+    cout << "Enter number of frames: ";
+    cin >> n;
+    cout << "Enter number of processes: ";
+    cin >> m;
+
+    vector<int> p(m);
+    cout << "Enter processes: ";
+    for (int &x : p) cin >> x;
+
+    vector<vector<int>> frames(n, vector<int>(m, -1));
+    unordered_map<int, int> mp;
+    int hit = 0;
+
+    for (int i = 0; i < m; i++) {
+        bool hitOccurred = false;
+        
+        // Check if the page is already in any frame
+        for (int j = 0; j < n; j++) {
+            if (frames[j][i] == p[i]) {
+                hit++;
+                mp[p[i]]++;
+                hitOccurred = true;
+                break;
+            }
+        }
+
+        if (!hitOccurred) {
+            // Page replacement: finding the least recently used (LRU) page
+            int replaceIdx = -1, oldest = i;
+            for (int j = 0; j < n; j++) {
+                if (frames[j][i] == -1) {
+                    replaceIdx = j;
+                    break;
+                }
+                if (mp[frames[j][i]] < oldest) {
+                    oldest = mp[frames[j][i]];
+                    replaceIdx = j;
+                }
+            }
+
+            mp.erase(frames[replaceIdx][i]);
+            for (int k = i; k < m; k++) {
+                frames[replaceIdx][k] = p[i];
+            }
+            mp[p[i]] = i;
+        }
+
+        // Update the remaining frames
+        for (auto &x : mp) if (x.first != p[i]) x.second++;
+    }
+
+    // Output the results
+    cout << "Process: ";
+    for (int x : p) cout << x << " ";
+    cout << "\n";
+
+    for (int i = 0; i < n; i++) {
+        cout << "Frame " << i << ": ";
+        for (int j = 0; j < m; j++) {
+            if (frames[i][j] == -1)
+                cout << "E ";
+            else
+                cout << frames[i][j] << " ";
+        }
+        cout << "\n";
+    }
+
+    cout << "Hits: " << hit << "\nPage Faults: " << m - hit << "\n";
+    return 0;
+}

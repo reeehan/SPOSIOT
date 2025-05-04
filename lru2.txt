@@ -1,0 +1,72 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    int frames, processes, hit = 0;
+    cout << "Enter number of frames: ";
+    cin >> frames;
+    cout << "Enter number of processes: ";
+    cin >> processes;
+
+    vector<int> page_seq(processes), hit_record(processes, 0);
+    vector<vector<int>> frame_state(frames, vector<int>(processes, -1));
+    unordered_map<int, int> frequency_map;
+
+    cout << "Enter processes: ";
+    for (int &p : page_seq) cin >> p;
+
+    for (int i = 0; i < processes; i++) {
+        bool page_in_memory = false;
+        vector<pair<int, int>> freq_sorted(frequency_map.begin(), frequency_map.end());
+        sort(freq_sorted.begin(), freq_sorted.end());
+
+        for (int j = 0; j < frames; j++) {
+            if (frame_state[j][i] == page_seq[i]) {  // Page hit
+                hit++;
+                hit_record[i] = 1;
+                frequency_map[page_seq[i]] = 1;
+                page_in_memory = true;
+                break;
+            }
+            if (frame_state[j][i] == -1) {  // Empty frame
+                fill(frame_state[j].begin() + i, frame_state[j].end(), page_seq[i]);
+                frequency_map[page_seq[i]]++;
+                page_in_memory = true;
+                break;
+            }
+        }
+
+        // Page fault: replace least frequently used
+        if (!page_in_memory) {
+            for (int j = 0; j < frames; j++) {
+                if (frame_state[j][i] == freq_sorted.back().second) {
+                    frequency_map.erase(frame_state[j][i]);
+                    fill(frame_state[j].begin() + i, frame_state[j].end(), page_seq[i]);
+                    frequency_map[page_seq[i]]++;
+                    break;
+                }
+            }
+        }
+
+        for (auto &entry : frequency_map) {
+            if (entry.first != page_seq[i]) entry.second++;
+        }
+    }
+
+    // Output results
+    cout << "Process sequence: ";
+    for (int p : page_seq) cout << p << " ";
+    cout << "\n";
+
+    for (int i = 0; i < frames; i++) {
+        cout << "Frame " << i << ": ";
+        for (int j = 0; j < processes; j++) 
+            cout << (frame_state[i][j] == -1 ? "E " : to_string(frame_state[i][j]) + " ");
+        cout << "\n";
+    }
+
+    for (int h : hit_record) cout << (h == 0 ? "  " : "1 ");
+    cout << "\nHits: " << hit << "\nPage Faults: " << processes - hit << "\n";
+
+    return 0;
+}

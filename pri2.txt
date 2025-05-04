@@ -1,0 +1,56 @@
+#include <iostream>
+using namespace std;
+
+int main() {
+    int n = 5;  // Number of processes
+    int CPU = 0;  // Current CPU time
+    int arrivaltime[] = {0, 5, 12, 2, 9};
+    int bursttime[] = {11, 28, 2, 10, 16};
+    int priority[] = {2, 0, 3, 1, 4};
+    int waitingTime[n] = {0}, turnaroundTime[n] = {0};
+    int remainingProcesses = n;
+
+    // Keep running until all processes are scheduled
+    while (remainingProcesses > 0) {
+        int minPriority = 1000, selectedProcess = -1;
+
+        // Find the process with the highest priority that has arrived
+        for (int i = 0; i < n; i++) {
+            if (arrivaltime[i] <= CPU && priority[i] < minPriority && bursttime[i] > 0) {
+                minPriority = priority[i];
+                selectedProcess = i;
+            }
+        }
+
+        if (selectedProcess == -1) {
+            CPU++;  // No process is ready, move CPU time forward
+            continue;
+        }
+
+        // Calculate waiting time and turnaround time for the selected process
+        waitingTime[selectedProcess] = CPU - arrivaltime[selectedProcess];
+        CPU += bursttime[selectedProcess];
+        turnaroundTime[selectedProcess] = CPU - arrivaltime[selectedProcess];
+
+        bursttime[selectedProcess] = 0;  // Mark process as completed
+        remainingProcesses--;
+    }
+
+    // Output results
+    cout << "\nProcess\tBurst Time\tPriority\tArrival Time\tWaiting Time\tTurnaround Time\n";
+    for (int i = 0; i < n; i++) {
+        cout << "P" << i + 1 << "\t" << bursttime[i] << "\t\t" << priority[i] << "\t\t" << arrivaltime[i]
+             << "\t\t" << waitingTime[i] << "\t\t" << turnaroundTime[i] << endl;
+    }
+
+    // Calculate and display average waiting and turnaround times
+    float avgWT = 0, avgTAT = 0;
+    for (int i = 0; i < n; i++) {
+        avgWT += waitingTime[i];
+        avgTAT += turnaroundTime[i];
+    }
+    cout << "\nAverage Waiting Time: " << avgWT / n << endl;
+    cout << "Average Turnaround Time: " << avgTAT / n << endl;
+
+    return 0;
+}
